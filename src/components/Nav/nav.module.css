@@ -16,21 +16,23 @@
   width: 20px;
   height: 36px;
   padding: 13px 0;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .nav__menu {
-  display: block;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    visibility 0.3s,
+    opacity 0.3s ease;
+}
+
+.nav__menu_open {
   visibility: visible;
+  opacity: 1;
 }
 
 .burger__line {
@@ -42,6 +44,7 @@
 
 .menu__list {
   padding: 18px 0 10px 0;
+  list-style: none;
 }
 
 .menu__item {

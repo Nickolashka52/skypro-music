@@ -1,0 +1,81 @@
+.filter__item {
+  position: relative;
+}
+
+.filter__button {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  border: 1px solid #ffffff;
+  border-radius: 60px;
+  padding: 6px 20px;
+  color: white;
+  cursor: pointer;
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+
+.filter__button:hover {
+  color: #d6acff;
+  border-color: #d6acff;
+}
+
+.persistent {
+  color: #d6acff;
+  border-color: #d6acff;
+}
+
+.filter__dropdown {
+  position: absolute;
+  top: 49px;
+  left: 0;
+  background-color: #313131;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 10;
+  width: max-content;
+  max-width: 248px;
+}
+
+.filter__list {
+  color: white;
+  display: flex;
+  gap: 28px;
+  height: max-content;
+  max-height: 237px;
+  overflow-y: auto;
+  flex-direction: column;
+  width: max-content;
+  max-width: 248px;
+}
+
+.filter__list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter__list::-webkit-scrollbar-track {
+  background-color: rgba(75, 73, 73, 1);
+}
+
+.filter__list::-webkit-scrollbar-thumb {
+  background-color: white;
+}
+
+.filter__listItem {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+.filter__listItem:hover {
+  color: #b672da;
+}
+
+.filter__listItem_selected {
+  color: #b672da;
+}
