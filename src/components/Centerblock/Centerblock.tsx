@@ -1,27 +1,61 @@
+'use client';
+
 import classNames from 'classnames';
 import styles from './centerblock.module.css';
 import Link from 'next/link';
+import Search from '../Search/Search';
+import FilterItem from '../FilterItem/FilterItem';
+import { data } from '@/data';
+import { formatDuration } from '@/utils/helper';
+import { useState } from 'react';
 
 export default function Centerblock() {
+  const [activeFilter, setActiveFilter] = useState<
+    'author' | 'year' | 'genre' | null
+  >(null);
+
+  const handleFilterChange = (
+    type: 'author' | 'year' | 'genre',
+    selected: string[],
+  ) => {
+    // Заглушка для будущей логики фильтрации
+    console.log(`Filter ${type} changed:`, selected);
+  };
+
+  const handleFilterToggle = (type: 'author' | 'year' | 'genre') => {
+    setActiveFilter((prev) => (prev === type ? null : type));
+  };
+
   return (
     <div className={styles.centerblock}>
-      <div className={styles.centerblock__search}>
-        <svg className={styles.search__svg}>
-          <use href="/img/icon/sprite.svg#icon-search"></use>
-        </svg>
-        <input
-          className={styles.search__text}
-          type="search"
-          placeholder="Поиск"
-          name="search"
-        />
-      </div>
+      <Search />
       <h2 className={styles.centerblock__h2}>Треки</h2>
       <div className={styles.centerblock__filter}>
         <div className={styles.filter__title}>Искать по:</div>
-        <div className={styles.filter__button}>исполнителю</div>
-        <div className={styles.filter__button}>году выпуска</div>
-        <div className={styles.filter__button}>жанру</div>
+        <FilterItem
+          type="author"
+          tracks={data}
+          onFilterChange={handleFilterChange}
+          isOpen={activeFilter === 'author'}
+          onToggle={() => handleFilterToggle('author')}
+          activeFilter={activeFilter}
+        />
+        <FilterItem
+          type="year"
+          tracks={data}
+          onFilterChange={handleFilterChange}
+          isOpen={activeFilter === 'year'}
+          onToggle={() => handleFilterToggle('year')}
+          activeFilter={activeFilter}
+        />
+        <FilterItem
+          type="genre"
+          tracks={data}
+          onFilterChange={handleFilterChange}
+          isOpen={activeFilter === 'genre'}
+          onToggle={() => handleFilterToggle('genre')}
+          activeFilter={activeFilter}
+        />
       </div>
       <div className={styles.centerblock__content}>
         <div className={styles.content__title}>
@@ -41,172 +75,45 @@ export default function Centerblock() {
           </div>
         </div>
         <div className={styles.content__playlist}>
-          <div className={styles.playlist__item}>
-            <div className={styles.playlist__track}>
-              <div className={styles.track__title}>
-                <div className={styles.track__titleImage}>
-                  <svg className={styles.track__title__svg}>
-                    <use href="/img/icon/sprite.svg#icon-note"></use>
-                  </svg>
-                </div>
-                <div className={styles.track__titleText}>
-                  <Link className={styles.track__titleLink} href="">
-                    Guilt <span className={styles.track__titleSpan}></span>
-                  </Link>
-                </div>
-              </div>
-              <div className={styles.track__author}>
-                <Link className={styles.track__authorLink} href="">
-                  Nero
-                </Link>
-              </div>
-              <div className={styles.track__album}>
-                <Link className={styles.track__albumLink} href="">
-                  Welcome Reality
-                </Link>
-              </div>
-              <div className={styles.track__time}>
-                <svg className={styles.track__time__svg}>
-                  <use href="/img/icon/sprite.svg#icon-like"></use>
-                </svg>
-                <span className={styles.track__timeText}>4:44</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.playlist__item}>
-            <div className={styles.playlist__track}>
-              <div className={styles.track__title}>
-                <div className={styles.track__titleImage}>
-                  <svg className={styles.track__title__svg}>
-                    <use href="/img/icon/sprite.svg#icon-note"></use>
-                  </svg>
-                </div>
-                <div className={styles.track__titleText}>
-                  <Link className={styles.track__titleLink} href="">
-                    Elektro <span className={styles.track__titleSpan}></span>
-                  </Link>
+          {data.map((track) => {
+            return (
+              <div key={track._id} className={styles.playlist__item}>
+                <div className={styles.playlist__track}>
+                  <div className={styles.track__title}>
+                    <div className={styles.track__titleImage}>
+                      <svg className={styles.track__title__svg}>
+                        <use href="/img/icon/sprite.svg#icon-note"></use>
+                      </svg>
+                    </div>
+                    <div className={styles.track__titleText}>
+                      <Link className={styles.track__titleLink} href="">
+                        {track.name}{' '}
+                        <span className={styles.track__titleSpan}></span>
+                      </Link>
+                    </div>
+                  </div>
+                  <div className={styles.track__author}>
+                    <Link className={styles.track__authorLink} href="">
+                      {track.author}
+                    </Link>
+                  </div>
+                  <div className={styles.track__album}>
+                    <Link className={styles.track__albumLink} href="">
+                      {track.album}
+                    </Link>
+                  </div>
+                  <div className={styles.track__time}>
+                    <svg className={styles.track__time__svg}>
+                      <use href="/img/icon/sprite.svg#icon-like"></use>
+                    </svg>
+                    <span className={styles.track__timeText}>
+                      {formatDuration(track.duration_in_seconds)}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className={styles.track__author}>
-                <Link className={styles.track__authorLink} href="">
-                  Dynoro, Outwork, Mr. Gee
-                </Link>
-              </div>
-              <div className={styles.track__album}>
-                <Link className={styles.track__albumLink} href="">
-                  Elektro
-                </Link>
-              </div>
-              <div className={styles.track__time}>
-                <svg className={styles.track__time__svg}>
-                  <use href="/img/icon/sprite.svg#icon-like"></use>
-                </svg>
-                <span className={styles.track__timeText}>2:22</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.playlist__item}>
-            <div className={styles.playlist__track}>
-              <div className={styles.track__title}>
-                <div className={styles.track__titleImage}>
-                  <svg className={styles.track__title__svg}>
-                    <use href="/img/icon/sprite.svg#icon-note"></use>
-                  </svg>
-                </div>
-                <div className={styles.track__titleText}>
-                  <Link className={styles.track__titleLink} href="">
-                    I’m Fire <span className={styles.track__titleSpan}></span>
-                  </Link>
-                </div>
-              </div>
-              <div className={styles.track__author}>
-                <Link className={styles.track__authorLink} href="">
-                  Ali Bakgor
-                </Link>
-              </div>
-              <div className={styles.track__album}>
-                <Link className={styles.track__albumLink} href="">
-                  I’m Fire
-                </Link>
-              </div>
-              <div className={styles.track__time}>
-                <svg className={styles.track__time__svg}>
-                  <use href="/img/icon/sprite.svg#icon-like"></use>
-                </svg>
-                <span className={styles.track__timeText}>2:22</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.playlist__item}>
-            <div className={styles.playlist__track}>
-              <div className={styles.track__title}>
-                <div className={styles.track__titleImage}>
-                  <svg className={styles.track__title__svg}>
-                    <use href="/img/icon/sprite.svg#icon-note"></use>
-                  </svg>
-                </div>
-                <div className={styles.track__titleText}>
-                  <Link className={styles.track__titleLink} href="">
-                    Non Stop
-                    <span className={styles.track__titleSpan}>(Remix)</span>
-                  </Link>
-                </div>
-              </div>
-              <div className={styles.track__author}>
-                <Link className={styles.track__authorLink} href="">
-                  Стоункат, Psychopath
-                </Link>
-              </div>
-              <div className={styles.track__album}>
-                <Link className={styles.track__albumLink} href="">
-                  Non Stop
-                </Link>
-              </div>
-              <div className={styles.track__time}>
-                <svg className={styles.track__time__svg}>
-                  <use href="/img/icon/sprite.svg#icon-like"></use>
-                </svg>
-                <span className={styles.track__timeText}>4:12</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.playlist__item}>
-            <div className={styles.playlist__track}>
-              <div className={styles.track__title}>
-                <div className={styles.track__titleImage}>
-                  <svg className={styles.track__title__svg}>
-                    <use href="/img/icon/sprite.svg#icon-note"></use>
-                  </svg>
-                </div>
-                <div className={styles.track__titleText}>
-                  <Link className={styles.track__titleLink} href="">
-                    Run Run
-                    <span className={styles.track__titleSpan}>(feat. AR/CO)</span>
-                  </Link>
-                </div>
-              </div>
-              <div className={styles.track__author}>
-                <Link className={styles.track__authorLink} href="">
-                  Jaded, Will Clarke, AR/CO
-                </Link>
-              </div>
-              <div className={styles.track__album}>
-                <Link className={styles.track__albumLink} href="">
-                  Run Run
-                </Link>
-              </div>
-              <div className={styles.track__time}>
-                <svg className={styles.track__time__svg}>
-                  <use href="/img/icon/sprite.svg#icon-like"></use>
-                </svg>
-                <span className={styles.track__timeText}>2:54</span>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
