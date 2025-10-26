@@ -2,11 +2,10 @@
 
 import classNames from 'classnames';
 import styles from './centerblock.module.css';
-import Link from 'next/link';
 import Search from '../Search/Search';
 import FilterItem from '../FilterItem/FilterItem';
+import Track from '../Track/Track';
 import { data } from '@/data';
-import { formatDuration } from '@/utils/helper';
 import { useState } from 'react';
 
 export default function Centerblock() {
@@ -18,7 +17,6 @@ export default function Centerblock() {
     type: 'author' | 'year' | 'genre',
     selected: string[],
   ) => {
-    // Заглушка для будущей логики фильтрации
     console.log(`Filter ${type} changed:`, selected);
   };
 
@@ -75,45 +73,9 @@ export default function Centerblock() {
           </div>
         </div>
         <div className={styles.content__playlist}>
-          {data.map((track) => {
-            return (
-              <div key={track._id} className={styles.playlist__item}>
-                <div className={styles.playlist__track}>
-                  <div className={styles.track__title}>
-                    <div className={styles.track__titleImage}>
-                      <svg className={styles.track__title__svg}>
-                        <use href="/img/icon/sprite.svg#icon-note"></use>
-                      </svg>
-                    </div>
-                    <div className={styles.track__titleText}>
-                      <Link className={styles.track__titleLink} href="">
-                        {track.name}{' '}
-                        <span className={styles.track__titleSpan}></span>
-                      </Link>
-                    </div>
-                  </div>
-                  <div className={styles.track__author}>
-                    <Link className={styles.track__authorLink} href="">
-                      {track.author}
-                    </Link>
-                  </div>
-                  <div className={styles.track__album}>
-                    <Link className={styles.track__albumLink} href="">
-                      {track.album}
-                    </Link>
-                  </div>
-                  <div className={styles.track__time}>
-                    <svg className={styles.track__time__svg}>
-                      <use href="/img/icon/sprite.svg#icon-like"></use>
-                    </svg>
-                    <span className={styles.track__timeText}>
-                      {formatDuration(track.duration_in_seconds)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {data.map((track) => (
+            <Track key={track._id} track={track} />
+          ))}
         </div>
       </div>
     </div>
