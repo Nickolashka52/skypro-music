@@ -8,7 +8,9 @@ export const formatTime = (seconds: number): string => {
 };
 
 export const formatDuration = (seconds: number): string => {
-  return formatTime(seconds);
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
 export function getUniqueValuesByKey(
@@ -16,10 +18,8 @@ export function getUniqueValuesByKey(
   key: keyof TrackType,
 ): string[] {
   const uniqueValues = new Set<string>();
-
   arr.forEach((item) => {
     const value = item[key];
-
     if (Array.isArray(value)) {
       value.forEach((v) => {
         if (v) {

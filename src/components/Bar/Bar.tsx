@@ -8,9 +8,9 @@ import { useRef, useState, useEffect, ChangeEvent } from 'react';
 import {
   setIsPlay,
   setNextTrack,
-  setPrevTrack, 
+  setPrevTrack,
   toggleShuffle,
-  toggleRepeat, 
+  toggleRepeat,
 } from '@/store/features/trackSlice';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import { formatTime } from '@/utils/helper'; // ← создадим эту функцию
@@ -22,8 +22,8 @@ export default function Bar() {
   // Состояния
   const [volume, setVolume] = useState(0.5);
   const [isLoadedTrack, setIsLoadedTrack] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0); 
-  const [duration, setDuration] = useState(0); 
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // Данные из Redux
   const currentTrack = useAppSelector((state) => state.tracks.currentTrack);

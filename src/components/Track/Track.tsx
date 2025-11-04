@@ -1,11 +1,7 @@
 'use client';
 
 import { useAppDispatch, useAppSelector } from '@/store/store';
-import {
-  setCurrentPlaylist,
-  setCurrentTrack,
-  setIsPlay,
-} from '@/store/features/trackSlice';
+import { setCurrentTrack, setIsPlay } from '@/store/features/trackSlice';
 import { TrackType } from '@/sharedTypes/sharedTypes';
 import classNames from 'classnames';
 import Link from 'next/link';
@@ -25,9 +21,8 @@ export default function Track({ track, playlist }: TrackProps) {
   const isCurrentTrack = currentTrack?._id === track._id;
 
   const handleTrackClick = () => {
-    dispatch(setCurrentTrack(track));
-    dispatch(setIsPlay(true)); // Запускаем воспроизведение
-    dispatch(setCurrentPlaylist(playlist));
+    dispatch(setCurrentTrack({ track, playlist }));
+    dispatch(setIsPlay(true));
   };
 
   return (

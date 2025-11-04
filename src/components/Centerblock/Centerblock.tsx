@@ -7,20 +7,19 @@ import FilterItem from '../FilterItem/FilterItem';
 import Track from '../Track/Track';
 import { data } from '@/data';
 import { useState } from 'react';
+import { FilterType } from '@/types/filterTypes'; // ← импортируем
 
 export default function Centerblock() {
-  const [activeFilter, setActiveFilter] = useState<
-    'author' | 'year' | 'genre' | null
-  >(null);
+  const [activeFilter, setActiveFilter] = useState<FilterType | null>(null);
 
   const handleFilterChange = (
-    type: 'author' | 'year' | 'genre',
+    type: FilterType,
     selected: string[],
   ) => {
     console.log(`Filter ${type} changed:`, selected);
   };
 
-  const handleFilterToggle = (type: 'author' | 'year' | 'genre') => {
+  const handleFilterToggle = (type: FilterType) => {
     setActiveFilter((prev) => (prev === type ? null : type));
   };
 
@@ -31,27 +30,27 @@ export default function Centerblock() {
       <div className={styles.centerblock__filter}>
         <div className={styles.filter__title}>Искать по:</div>
         <FilterItem
-          type="author"
+          type={FilterType.AUTHOR}
           tracks={data}
           onFilterChange={handleFilterChange}
-          isOpen={activeFilter === 'author'}
-          onToggle={() => handleFilterToggle('author')}
+          isOpen={activeFilter === FilterType.AUTHOR}
+          onToggle={() => handleFilterToggle(FilterType.AUTHOR)}
           activeFilter={activeFilter}
         />
         <FilterItem
-          type="year"
+          type={FilterType.YEAR}
           tracks={data}
           onFilterChange={handleFilterChange}
-          isOpen={activeFilter === 'year'}
-          onToggle={() => handleFilterToggle('year')}
+          isOpen={activeFilter === FilterType.YEAR}
+          onToggle={() => handleFilterToggle(FilterType.YEAR)}
           activeFilter={activeFilter}
         />
         <FilterItem
-          type="genre"
+          type={FilterType.GENRE}
           tracks={data}
           onFilterChange={handleFilterChange}
-          isOpen={activeFilter === 'genre'}
-          onToggle={() => handleFilterToggle('genre')}
+          isOpen={activeFilter === FilterType.GENRE}
+          onToggle={() => handleFilterToggle(FilterType.GENRE)}
           activeFilter={activeFilter}
         />
       </div>
