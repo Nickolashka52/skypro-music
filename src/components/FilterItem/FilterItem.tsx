@@ -3,27 +3,33 @@ import classNames from 'classnames';
 import styles from './filterItem.module.css';
 import { getUniqueValuesByKey } from '@/utils/helper';
 import { TrackType } from '@/sharedTypes/sharedTypes';
+import { FilterType } from '@/types/filterTypes'; // ← импортируем enum
 
 interface FilterItemProps {
-  type: 'author' | 'year' | 'genre';
+  type: FilterType; // ← теперь enum
   tracks: TrackType[];
-  onFilterChange: (type: 'author' | 'year' | 'genre', selected: string[]) => void;
+  onFilterChange: (type: FilterType, selected: string[]) => void;
   isOpen: boolean;
   onToggle: () => void;
-  activeFilter: 'author' | 'year' | 'genre' | null;
+  activeFilter: FilterType | null; // ← теперь enum или null
 }
 
-export default function FilterItem({ type, tracks, onFilterChange, isOpen, onToggle, activeFilter }: FilterItemProps) {
+export default function FilterItem({
+  type,
+  tracks,
+  onFilterChange,
+  isOpen,
+  onToggle,
+  activeFilter,
+}: FilterItemProps) {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const handleItemClick = (value: string) => {
-    if (type === 'year') {
-      // Для года — только один выбор
+    if (type === FilterType.YEAR) {
       setSelectedValues([value]);
       onFilterChange(type, [value]);
-      onToggle(); // Закрываем окно
+      onToggle();
     } else {
-      // Для автора и жанра — множественный выбор
       const newSelected = selectedValues.includes(value)
         ? selectedValues.filter((v) => v !== value)
         : [...selectedValues, value];
@@ -32,9 +38,8 @@ export default function FilterItem({ type, tracks, onFilterChange, isOpen, onTog
     }
   };
 
-  // Определяем элементы списка в зависимости от типа фильтра
   const items =
-    type === 'year'
+    type === FilterType.YEAR
       ? ['По умолчанию', 'Сначала новые', 'Сначала старые']
       : getUniqueValuesByKey(tracks, type);
 
@@ -46,7 +51,11 @@ export default function FilterItem({ type, tracks, onFilterChange, isOpen, onTog
         })}
         onClick={onToggle}
       >
-        {type === 'author' ? 'исполнителю' : type === 'year' ? 'году выпуска' : 'жанру'}
+        {type === FilterType.AUTHOR
+          ? 'исполнителю'
+          : type === FilterType.YEAR
+          ? 'году выпуска'
+          : 'жанру'}
       </div>
       {isOpen && (
         <div className={styles.filter__dropdown}>

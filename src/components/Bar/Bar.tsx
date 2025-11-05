@@ -4,101 +4,158 @@ import Link from 'next/link';
 import styles from './bar.module.css';
 import classnames from 'classnames';
 import { useAppDispatch, useAppSelector } from '@/store/store';
-import { useRef, useState, useEffect } from 'react';
-import { setIsPlay } from '@/store/features/trackSlice';
+import { useRef, useState, useEffect, ChangeEvent } from 'react';
+import {
+  setIsPlay,
+  setNextTrack,
+  setPrevTrack,
+  toggleShuffle,
+  toggleRepeat,
+} from '@/store/features/trackSlice';
+import ProgressBar from '../ProgressBar/ProgressBar';
+import { formatTime } from '@/utils/helper'; // ← создадим эту функцию
 
 export default function Bar() {
-  const currentTrack = useAppSelector((state) => state.tracks.currentTrack);
-  const dispatch = useAppDispatch();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const dispatch = useAppDispatch();
 
-  // Синхронизация isPlaying с реальным состоянием аудио
+  // Состояния
+  const [volume, setVolume] = useState(0.5);
+  const [isLoadedTrack, setIsLoadedTrack] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  // Данные из Redux
+  const currentTrack = useAppSelector((state) => state.tracks.currentTrack);
+  const isPlaying = useAppSelector((state) => state.tracks.isPlay);
+  const isShuffle = useAppSelector((state) => state.tracks.isShuffle);
+  const isRepeat = useAppSelector((state) => state.tracks.isRepeat); // ← НОВОЕ
+
+  // === Синхронизация с аудио ===
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handlePlay = () => {
-      setIsPlaying(true);
-      dispatch(setIsPlay(true));
-    };
-    const handlePause = () => {
-      setIsPlaying(false);
-      dispatch(setIsPlay(false));
-    };
+    const handlePlay = () => dispatch(setIsPlay(true));
+    const handlePause = () => dispatch(setIsPlay(false));
+
     const handleEnded = () => {
-      setIsPlaying(false);
-      dispatch(setIsPlay(false));
+      if (isRepeat) {
+        // Повтор текущего — loop сам перезапустит
+        dispatch(setIsPlay(true));
+      } else {
+        // Переход к следующему + автозапуск
+        dispatch(setNextTrack());
+        dispatch(setIsPlay(true));
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      setIsLoadedTrack(true);
+      if (isPlaying) audio.play();
     };
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [dispatch]);
+  }, [dispatch, isPlaying, isRepeat]);
 
-  // Обновляем src аудио и запускаем воспроизведение при смене трека
+  // 1. Смена трека — только при смене currentTrack
   useEffect(() => {
     if (currentTrack && audioRef.current) {
       audioRef.current.src = currentTrack.track_file;
-      audioRef.current.play().catch((error) => {
-        console.error('Error playing audio:', error);
-        setIsPlaying(false);
-        dispatch(setIsPlay(false));
-      });
-      setIsPlaying(true);
-      dispatch(setIsPlay(true));
+      setCurrentTime(0);
+      setIsLoadedTrack(false);
     }
-  }, [currentTrack, dispatch]);
+  }, [currentTrack]);
 
-  const playTrack = () => {
+  // 2. Повтор — отдельно
+  useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.play().catch((error) => {
-        console.error('Error playing audio:', error);
-        setIsPlaying(false);
-        dispatch(setIsPlay(false));
-      });
-      setIsPlaying(true);
-      dispatch(setIsPlay(true));
+      audioRef.current.loop = isRepeat;
     }
-  };
+  }, [isRepeat]);
 
-  const pauseTrack = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-      dispatch(setIsPlay(false));
-    }
-  };
-
+  // === Управление воспроизведением ===
   const handlePlayPause = () => {
+    if (!audioRef.current) return;
     if (isPlaying) {
-      pauseTrack();
+      audioRef.current.pause();
     } else {
-      playTrack();
+      audioRef.current.play().catch(console.error);
     }
   };
+
+  const handleNext = () => dispatch(setNextTrack());
+  const handlePrev = () => dispatch(setPrevTrack()); // ← НОВОЕ
+  const handleToggleRepeat = () => dispatch(toggleRepeat()); // ← НОВОЕ
+  const handleToggleShuffle = () => dispatch(toggleShuffle());
+
+  // === Прогресс ===
+  const onChangeProgress = (e: ChangeEvent<HTMLInputElement>) => {
+    const time = Number(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  // === Громкость ===
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   if (!currentTrack) return <></>;
 
   return (
     <div className={styles.bar}>
-      <audio ref={audioRef} src={currentTrack?.track_file}></audio>
       <div className={styles.bar__content}>
-        <div className={styles.bar__playerProgress}></div>
+        {/* Аудио элемент */}
+        <audio ref={audioRef} />
+
+        {/* Прогресс-бар + время */}
+        <div className={styles.progressContainer}>
+          <span className={styles.time}>{formatTime(currentTime)}</span>
+          <ProgressBar
+            max={duration || 0}
+            step={0.1}
+            readOnly={!isLoadedTrack}
+            value={currentTime}
+            onChange={onChangeProgress}
+          />
+          <span className={styles.time}>{formatTime(duration)}</span>
+        </div>
+
         <div className={styles.bar__playerBlock}>
           <div className={styles.bar__player}>
             <div className={styles.player__controls}>
-              <div className={styles.player__btnPrev}>
+              {/* Предыдущий трек */}
+              <div
+                className={classnames(styles.player__btnPrev, styles.btn)}
+                onClick={handlePrev}
+              >
                 <svg className={styles.player__btnPrev__svg}>
                   <use href="/img/icon/sprite.svg#icon-prev"></use>
                 </svg>
               </div>
+
+              {/* Плей / Пауза */}
               <div
                 className={classnames(styles.player__btnPlay, styles.btn)}
                 onClick={handlePlayPause}
@@ -109,22 +166,42 @@ export default function Bar() {
                   />
                 </svg>
               </div>
-              <div className={styles.player__btnNext}>
+
+              {/* Следующий трек */}
+              <div
+                onClick={handleNext}
+                className={classnames(styles.player__btnNext, styles.btn)}
+              >
                 <svg className={styles.player__btnNext__svg}>
                   <use href="/img/icon/sprite.svg#icon-next"></use>
                 </svg>
               </div>
+
+              {/* Повтор — жирный, если включён */}
               <div
-                className={classnames(styles.player__btnRepeat, styles.btnIcon)}
+                onClick={handleToggleRepeat}
+                className={classnames(
+                  styles.player__btnRepeat,
+                  styles.btnIcon,
+                  {
+                    [styles.active]: isRepeat, // ← жирный стиль
+                  },
+                )}
               >
                 <svg className={styles.player__btnRepeat__svg}>
                   <use href="/img/icon/sprite.svg#icon-repeat"></use>
                 </svg>
               </div>
+
+              {/* Shuffle — жирный, если включён */}
               <div
+                onClick={handleToggleShuffle}
                 className={classnames(
                   styles.player__btnShuffle,
                   styles.btnIcon,
+                  {
+                    [styles.active]: isShuffle, // ← жирный стиль
+                  },
                 )}
               >
                 <svg className={styles.player__btnShuffle__svg}>
@@ -133,6 +210,7 @@ export default function Bar() {
               </div>
             </div>
 
+            {/* Инфа о треке */}
             <div className={styles.player__trackPlay}>
               <div className={styles.trackPlay__contain}>
                 <div className={styles.trackPlay__image}>
@@ -173,6 +251,8 @@ export default function Bar() {
               </div>
             </div>
           </div>
+
+          {/* Громкость */}
           <div className={styles.bar__volumeBlock}>
             <div className={styles.volume__content}>
               <div className={styles.volume__image}>
@@ -187,7 +267,10 @@ export default function Bar() {
                     styles.btn,
                   )}
                   type="range"
-                  name="range"
+                  min="0"
+                  max="100"
+                  value={volume * 100}
+                  onChange={(e) => setVolume(Number(e.target.value) / 100)}
                 />
               </div>
             </div>

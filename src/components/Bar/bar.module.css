@@ -63,6 +63,10 @@
   padding: 0 27px 0 31px;
 }
 
+.time {
+  color: white;
+}
+
 .player__btnPrev,
 .player__btnPlay,
 .player__btnNext,
@@ -166,6 +170,13 @@
   -webkit-box-direction: normal;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.player__btnRepeat.active svg,
+.player__btnShuffle.active svg {
+  stroke: #ffffff;
+  fill: transparent;
+  font-weight: bold; /* или можно через filter */
 }
 
 .trackPlay__contain {
